@@ -14,7 +14,7 @@ dp i的更新,j为0~i-1中nums[j]小于等于nums[i]的下标
 //二分做的
 
 
-int lengthOfLIS1(vector<int> &nums) {
+int lengthOfLIS(vector<int> &nums) {
 	auto end = nums.begin();
 	for (int x : nums) {
 		auto it = lower_bound(nums.begin(), end, x);
@@ -68,10 +68,7 @@ int main() {
 	for(int i=0; i<n; ++i) {
 		cin>>nums[i];
 	}
-	auto ans=lengthOfLIS(nums);
-	for(auto a:ans){
-		cout<<a<<" ";
-	}
+	cout<<lengthOfLIS(nums)<<"\n";
 
 	return 0;
 }
