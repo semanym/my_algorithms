@@ -11,21 +11,35 @@ dp i的更新,j为0~i-1中nums[j]小于等于nums[i]的下标
 
 
 //如果是非递减就改为加等于
-//二分做的，返回的数组下标0代表长度，从下标1开始代表第一个最长的子数组 
+//二分做的
+
+
+int lengthOfLIS1(vector<int> &nums) {
+	auto end = nums.begin();
+	for (int x : nums) {
+		auto it = lower_bound(nums.begin(), end, x);
+		*it = x;
+		if (it == end) { // >=x 的 g[j] 不存在
+			++end;
+		}
+	}
+	return end - nums.begin();
+}
+
+
+/*
+很遗憾我尝试返回最前的一个数组，但是fail了 
 vector<int> lengthOfLIS(vector<int>& nums) {
 	int n = nums.size();
-	if (n == 0) {
-		return {0};
-	}
-	vector<int> d(n + 1, 0);
-	d[0] = 1; d[d[0]] = nums[0];
+	if (n == 0) return {0};
+	vector<int> d(n + 1, 0),from(n, -1),index(n + 1);int final = 0;
+	d[0] = 1; d[d[0]] = nums[0];index[1] = 0;index[0] = -1;
 	for (int i = 1; i < n; ++i) {
 		if (nums[i] > d[d[0]]) {//>=
-			d[++d[0]] = nums[i];
+			d[++d[0]] = nums[i];index[d[0]] = i;final=i;
+			if(from[i] == -1) from[i] = index[d[0]-1];
 		} else {
-			int l = 1, r = d[0], pos = 0; 
-			// 如果找不到说明所有的数都比 nums[i]
-			// 大，此时要更新 d[1]，所以这里将 pos 设为 0
+			int l = 1, r = d[0], pos = 0;
 			while (l <= r) {
 				int mid = (l + r) >> 1;
 				if (d[mid] < nums[i]) {//<=
@@ -35,22 +49,30 @@ vector<int> lengthOfLIS(vector<int>& nums) {
 					r = mid - 1;
 				}
 			}
-			d[pos + 1] = nums[i];
-		}
+			d[pos + 1] = nums[i]; index[pos + 1] = i;
+			if(pos > 0) from[i] = index[pos];
+		} 
+	}
+	d.resize(d[0] + 1);
+	for(int i=d[0];i>=1;--i){
+		d[i]=nums[final];final=from[final];
 	}
 	return d;
 }
+*/
 
+int main() {
+	int n;
+	cin>>n;
+	vector<int> nums(n);
+	for(int i=0; i<n; ++i) {
+		cin>>nums[i];
+	}
+	auto ans=lengthOfLIS(nums);
+	for(auto a:ans){
+		cout<<a<<" ";
+	}
 
-int main(){
-    int n;cin>>n;
-    vector<int> nums(n);
-    for(int i=0;i<n;++i){
-        cin>>nums[i];
-    }
-    auto ans=lengthOfLIS(nums);
-    cout<<ans[0]<<"\n";
-    
-    return 0;
+	return 0;
 }
 
