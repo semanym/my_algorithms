@@ -5,7 +5,8 @@ const int L = 1e6 + 5;
 const int HASH_CNT = 2;
 
 int hashBase[HASH_CNT] = {29, 31};
-int hashMod[HASH_CNT] = {int(1e9 + 9), 998244353};
+int hashMod[HASH_CNT] = {1000000009,998244353};
+//1000000009,998244353,402653189,201326611,100663319,50331653,1000000007
 
 struct StringWithHash {
 	char s[L];//从1开始的
