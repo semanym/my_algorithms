@@ -17,6 +17,8 @@ void init(int n) {
     }
     return;
 }
+
+
 template <typename T>
 class SparseTable {
 		using VT = vector<T>;
@@ -34,7 +36,7 @@ class SparseTable {
 	public:
 		SparseTable(const vector<T> &v, func_type _func = default_func) {
 			op = _func;
-			int len = v.size(), l1 = lg[len] + 1;//l1 = ceil(log2(len)) + 1;
+			int len = v.size(), l1 = ceil(log2(len)) + 1;//l1 = lg[len] + 1;
 			ST.assign(len, VT(l1, 0));
 			for (int i = 0; i < len; ++i) {
 				ST[i][0] = v[i];
@@ -52,5 +54,14 @@ class SparseTable {
 			int q = floor(log2(lt));
 			return op(ST[l][q], ST[r - (1 << q) + 1][q]);
 		}
+		
 };
 
+		/* 如果用init 的lg的话要换成这个
+		T query(int l, int r) {
+			if(l == r) return ST[l][0];
+			int length = r - l + 1;
+			int q = lg[length] - 1;
+			return op(ST[l][q], ST[r - (1 << q) + 1][q]);
+		}
+		*/
