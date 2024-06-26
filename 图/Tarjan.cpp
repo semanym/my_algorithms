@@ -2,7 +2,7 @@
 
 using namespace std;
 
-const int N = 100005;const int M = 100005;
+const int N = 100005; const int M = 100005;
 
 /*
 求有向图的强连通分量
@@ -20,11 +20,12 @@ int sz[N];       // 强连通 i 的大小
 void tarjan(int u) {
 	//入x时，盖戳，入栈
 	low[u] = dfn[u] = ++dfncnt, s[++tp] = u, in_stack[u] = 1;
-	for (int v:g[u]) {
+	for (int v : g[u]) {
 		if (!dfn[v]) { //若y尚未访问
 			tarjan(v);
 			low[u] = min(low[u], low[v]);//回x时更新low
-		} else if (in_stack[v]) {//若v已访问且在栈中
+		}
+		else if (in_stack[v]) {//若v已访问且在栈中
 			low[u] = min(low[u], dfn[v]);//更新low
 		}
 	}
@@ -33,11 +34,11 @@ void tarjan(int u) {
 		int v;
 		++sc;
 		do {
-			v=s[tp--];
-			in_stack[v]=0;
-			scc[v]=sc;//SCC编号
+			v = s[tp--];
+			in_stack[v] = 0;
+			scc[v] = sc;//SCC编号
 			++sz[sc];//SCC大小
-		} while(v!=u);
+		} while (v!=u);
 	}
 }
 
@@ -50,56 +51,44 @@ void tarjan(int u) {
 如果无论删去哪条边（只能删去一条）都不能使它们不连通，我们就说 u 和 v 边双连通。
 */
 
-
 //不使用链式前向星
-class eDCC {
+struct eDCC {
+	int n, m, i = 1; //n是点的个数，点是从1开始的。
+	vector<vector<pair<int, int>>> e;
+	vector<int> dfn, low, dcc;
+	int tot = 0, cnt = 0;
+	stack<int> stk;
+	vector<int> bri;//有需要再用，记得tarjan中注释取消掉
 
-int n,m;
-vector<pair<int, int>> e[N];
-int dfn[N], low[N], tot;
-stack<int> stk;
-int dcc[N], cnt;
-int bri[M];
+	eDCC(int n) :n(n), e(n+5), dfn(n+5, 0), low(n+5), dcc(n+5, 0) {}
+	eDCC(int n, int m) :n(n), m(m), e(n+5), dfn(n+5, 0), low(n+5), dcc(n+5, 0), bri(m+5, 0) {}
+	void addEdge(int a, int b) { e[a].emplace_back(b, i<<1); e[b].emplace_back(a, i<<1|1); ++i; }
+	void build() { for (int i = 1; i<=n; ++i) { if (!dfn[i]) { tarjan(i, 0); } } }
 
-
-void tarjan(int x, int in_edg) {
-	dfn[x] = low[x] = ++tot;
-	stk.push(x);
-	for (auto it:e[x]) {
-		int y = it.first,i=it.second;
-		if (!dfn[y]) {
-			tarjan(y, i);
-			low[x] = min(low[x], low[y]);
-			if (low[y]>dfn[x]) {
-				bri[i] = bri[i^1] = true;
+	void tarjan(int x, int in_edg) {
+		dfn[x] = low[x] = ++tot;
+		stk.push(x);
+		for (auto it:e[x]) {
+			int y = it.first, i = it.second;
+			if (!dfn[y]) {
+				tarjan(y, i);
+				low[x] = min(low[x], low[y]);
+				//if (low[y]>dfn[x]) bri[i] = bri[i^1] = true;
 			}
-		} else if (i!=(1^in_edg)) { //不是反边
-			low[x] = min(low[x], dfn[y]);
+			else if (i!=(1^in_edg)) { //不是反边
+				low[x] = min(low[x], dfn[y]);
+			}
+		}
+		if (dfn[x]==low[x]) {
+			++cnt;
+			int y;
+			do {
+				y = stk.top();
+				stk.pop();
+				dcc[y] = cnt;
+			} while (y!=x);
 		}
 	}
-	if (dfn[x]==low[x]) {
-		++cnt;
-		int y;
-		do {
-			y = stk.top();
-			stk.pop();
-			dcc[y] = cnt;
-		} while (y!=x);
-	}
-}
-
-int main() {
-	cin>>n>>m;
-	for(int i=1; i<=m; ++i) {
-		int a,b;
-		cin>>a>>b;
-		e[a].emplace_back(b,i<<1);
-		e[b].emplace_back(a,i<<1|1);
-	}
-
-	return 0;
-}
-
 };
 
 
@@ -131,7 +120,8 @@ void tarjan(int x, int in_edg) {
 			if (low[y]>dfn[x]) {
 				bri[i] = bri[i^1] = true;
 			}
-		} else if (i!=(1^in_edg)) { //不是反边
+		}
+		else if (i!=(1^in_edg)) { //不是反边
 			low[x] = min(low[x], dfn[y]);
 		}
 	}
@@ -146,8 +136,8 @@ void tarjan(int x, int in_edg) {
 	}
 }
 
-int main(){
-	memset(h,-1,sizeof(h));
+int main() {
+	memset(h, -1, sizeof(h));
 	return 0;
 }
 
@@ -165,83 +155,83 @@ vDCC缩点
 */
 class vDCC {
 
-int n, m;
-vector<int> e[N], ne[N];//new e新图，就是缩点之后的图
-int dfn[N], low[N], tot;
-stack<int> stk;
-vector<int> dcc[N];
-int cut[N], root, cnt, num, id[N];
+	int n, m;
+	vector<int> e[N], ne[N];//new e新图，就是缩点之后的图
+	int dfn[N], low[N], tot;
+	stack<int> stk;
+	vector<int> dcc[N];
+	int cut[N], root, cnt, num, id[N];
 
-void Tarjan(int x);
+	void Tarjan(int x);
 
-void tarjan(int x){
-	root = x;
-	Tarjan(x);
-}
-
-void Tarjan(int x) {
-    dfn[x] = low[x] = ++tot;
-    stk.push(x);
-    if (!e[x].size()) { //孤点
-        dcc[++cnt].push_back(x);
-        return;
-    }
-    int child = 0;
-    for (int y : e[x]) {
-        if (!dfn[y]) { //若y尚未访问
-            Tarjan(y);
-            low[x] = min(low[x], low[y]);
-            if (low[y]>=dfn[x]) {
-                child++;
-                if (x!=root||child>1) {
-                    cut[x] = true;
-                }
-                cnt++;
-                int z;
-                do { //记录vDCC
-                    z = stk.top();
-                    stk.pop();
-                    dcc[cnt].push_back(z);
-                } while (z!=y);
-                dcc[cnt].push_back(x);
-            }
-        }
-        else { //若y已经访间
-            low[x] = min(low[x], dfn[y]);
-        }
-    }
-}
-
-
-int main() {
-	cin>>n>>m;
-	while(m--) {
-		int a,b;
-		cin>>a>>b;
-		if(a==b)continue;
-		e[a].push_back(b),e[b].push_back(a);
-	}
-	for(root=1; root<=n; ++root) {
-		if(!dfn[root]) tarjan(root);
+	void tarjan(int x) {
+		root = x;
+		Tarjan(x);
 	}
 
-	//给每个割点一个新编号（cnt+1开始）
-	num=cnt;
-	for(int i=1; i<=n; ++i) {
-		if(cut[i])id[i]==++num;
-	}
-
-	//新建图，从每个vDCC向对应割点连边
-	for(int i=1; i<=cnt; ++i) {
-		for(int j=0; j<dcc[i].size(); ++j) {
-			int x=dcc[i][j];
-			if(cut[x]) {
-				ne[i].push_back(id[x]);
-				ne[id[x]].push_back(i);
+	void Tarjan(int x) {
+		dfn[x] = low[x] = ++tot;
+		stk.push(x);
+		if (!e[x].size()) { //孤点
+			dcc[++cnt].push_back(x);
+			return;
+		}
+		int child = 0;
+		for (int y : e[x]) {
+			if (!dfn[y]) { //若y尚未访问
+				Tarjan(y);
+				low[x] = min(low[x], low[y]);
+				if (low[y]>=dfn[x]) {
+					child++;
+					if (x!=root||child>1) {
+						cut[x] = true;
+					}
+					cnt++;
+					int z;
+					do { //记录vDCC
+						z = stk.top();
+						stk.pop();
+						dcc[cnt].push_back(z);
+					} while (z!=y);
+					dcc[cnt].push_back(x);
+				}
+			}
+			else { //若y已经访间
+				low[x] = min(low[x], dfn[y]);
 			}
 		}
 	}
-	return 0;
-}
+
+
+	int main() {
+		cin>>n>>m;
+		while (m--) {
+			int a, b;
+			cin>>a>>b;
+			if (a==b)continue;
+			e[a].push_back(b), e[b].push_back(a);
+		}
+		for (root = 1; root<=n; ++root) {
+			if (!dfn[root]) tarjan(root);
+		}
+
+		//给每个割点一个新编号（cnt+1开始）
+		num = cnt;
+		for (int i = 1; i<=n; ++i) {
+			if (cut[i])id[i]==++num;
+		}
+
+		//新建图，从每个vDCC向对应割点连边
+		for (int i = 1; i<=cnt; ++i) {
+			for (int j = 0; j<dcc[i].size(); ++j) {
+				int x = dcc[i][j];
+				if (cut[x]) {
+					ne[i].push_back(id[x]);
+					ne[id[x]].push_back(i);
+				}
+			}
+		}
+		return 0;
+	}
 
 };
