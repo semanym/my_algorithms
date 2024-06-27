@@ -16,7 +16,7 @@ void solve()
 int32_t main()
 {
     fast_read
-    int _ ;cin>>_;
+    int _ =1;cin>>_;
     while (_--)
     {
         solve();
