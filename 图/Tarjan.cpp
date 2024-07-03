@@ -153,16 +153,21 @@ int main() {
 
 vDCC缩点
 */
-class vDCC {
-
-	int n, m;
-	vector<int> e[N], ne[N];//new e新图，就是缩点之后的图
-	int dfn[N], low[N], tot;
+struct vDCC {
+	int n, tot = 0, root, cnt = 0, num;//n从1开始
+	vector<vector<int>> dcc, e, ne;//new e新图，就是缩点之后的图
+	vector<int> dfn, low, id;
 	stack<int> stk;
-	vector<int> dcc[N];
-	int cut[N], root, cnt, num, id[N];
+	vector<bool> cut;
 
-	void Tarjan(int x);
+	vDCC() {}
+	vDCC(int n) :n(n), tot(0), cnt(0), e(n+5), ne(n+5), dfn(n+5, 0), low(n+5), dcc(n+5), id(n+5), cut(n+5) {}
+	void addEdge(int a, int b) { e[a].push_back(b); e[b].push_back(a); }
+	void build() {
+		for (root = 1; root<=n; ++root) {
+			if (!dfn[root]) Tarjan(root);
+		}
+	}
 
 	void tarjan(int x) {
 		root = x;
@@ -202,25 +207,13 @@ class vDCC {
 		}
 	}
 
-
-	int main() {
-		cin>>n>>m;
-		while (m--) {
-			int a, b;
-			cin>>a>>b;
-			if (a==b)continue;
-			e[a].push_back(b), e[b].push_back(a);
-		}
-		for (root = 1; root<=n; ++root) {
-			if (!dfn[root]) tarjan(root);
-		}
-
+	//没检测过
+	void buildNe() {
 		//给每个割点一个新编号（cnt+1开始）
 		num = cnt;
 		for (int i = 1; i<=n; ++i) {
 			if (cut[i])id[i]==++num;
 		}
-
 		//新建图，从每个vDCC向对应割点连边
 		for (int i = 1; i<=cnt; ++i) {
 			for (int j = 0; j<dcc[i].size(); ++j) {
@@ -231,7 +224,29 @@ class vDCC {
 				}
 			}
 		}
-		return 0;
+	}
+};
+
+int n, m;
+
+int main() {
+	vDCC vdcc(n);
+	cin>>n>>m;
+	while (m--) {
+		int a, b;
+		cin>>a>>b;
+		if (a==b)continue;
+		vdcc.addEdge(a, b);
+	}
+	vdcc.build();
+	cout<<vdcc.cnt<<"\n";
+
+	for (int i = 1; i<=vdcc.cnt; ++i) {
+		cout<<vdcc.dcc[i].size()<<" ";
+		for (auto n:vdcc.dcc[i])cout<<n<<" ";
+		cout<<"\n";
 	}
 
-};
+	vdcc.buildNe();
+	return 0;
+}
