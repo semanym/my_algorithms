@@ -58,10 +58,10 @@ struct eDCC {
 	vector<int> dfn, low, dcc;
 	int tot = 0, cnt = 0;
 	stack<int> stk;
-	vector<int> bri;//有需要再用，记得tarjan中注释取消掉
+	vector<int> bri;//有需要再用，记得tarjan中注释取消掉，并且构造函数初始化
 
 	eDCC(int n) :n(n), e(n+5), dfn(n+5, 0), low(n+5), dcc(n+5, 0) {}
-	eDCC(int n, int m) :n(n), m(m), e(n+5), dfn(n+5, 0), low(n+5), dcc(n+5, 0), bri(m+5, 0) {}
+	eDCC(int n, int m) :n(n), m(m), e(n+5), dfn(n+5, 0), low(n+5), dcc(n+5, 0), bri((2*m+5), 0) {}//无向图一个边两个编号
 	void addEdge(int a, int b) { e[a].emplace_back(b, i<<1); e[b].emplace_back(a, i<<1|1); ++i; }
 	void build() { for (int i = 1; i<=n; ++i) { if (!dfn[i]) { tarjan(i, 0); } } }
 
@@ -91,6 +91,10 @@ struct eDCC {
 	}
 };
 
+/*
+可能有重边
+因此，我们不能根据顶点来判断，而是要根据边来判断，条件是不能走上一次走过的边
+*/
 
 struct edge {
 	int v, ne;
