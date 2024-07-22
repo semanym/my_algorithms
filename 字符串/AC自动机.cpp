@@ -17,7 +17,7 @@ struct trie_node {
 
     void init() {
         memset(son, 0, sizeof(son));
-        fail = flag = 0;
+        fail = flag= ans = 0;
     }
 } trie[maxn];//不使用指针，用数组模拟链式结构,根节点是1
 
@@ -113,8 +113,8 @@ int main() {
 
 以下是求有多少个模式串出现了，并且没有对失配指针优化
 */
-namespace AC{
-    
+namespace AC {
+
     const int N = 500010;
     int n; char str[1000010];
     int ch[N][26], cnt[N], idx;
@@ -143,7 +143,7 @@ namespace AC{
             }
         }
     }
-    
+
     int query(char* s) {
         int ans = 0;
         for (int k = 0, i = 0; s[k]; k++) {
@@ -165,3 +165,73 @@ namespace AC{
     }
 
 }
+
+struct Node {
+    Node* son[26]{};
+    Node* fail; // 当 cur.son[i] 不能匹配 target 中的某个字符时，cur.fail.son[i] 即为下一个待匹配节点（等于 root 则表示没有匹配）
+    Node* last; // 后缀链接（suffix link），用来快速跳到一定是某个 words[k] 的最后一个字母的节点（等于 root 则表示没有）
+    int len = 0;
+};
+
+struct AhoCorasick {
+    Node* root = new Node();
+
+    void put(string& s) {
+        auto cur = root;
+        for (char b : s) {
+            b -= 'a';
+            if (cur->son[b] == nullptr) {
+                cur->son[b] = new Node();
+            }
+            cur = cur->son[b];
+        }
+        cur->len = s.length();
+    }
+
+    void build_fail() {
+        root->fail = root->last = root;
+        queue<Node*> q;
+        for (auto& son : root->son) {
+            if (son == nullptr) {
+                son = root;
+            }
+            else {
+                son->fail = son->last = root; // 第一层的失配指针，都指向根节点 ∅
+                q.push(son);
+            }
+        }
+        // BFS
+        while (!q.empty()) {
+            auto cur = q.front();
+            q.pop();
+            for (int i = 0; i < 26; i++) {
+                auto& son = cur->son[i];
+                if (son == nullptr) {
+                    // 虚拟子节点 cur.son[i]，和 cur.fail.son[i] 是同一个
+                    // 方便失配时直接跳到下一个可能匹配的位置（但不一定是某个 words[k] 的最后一个字母）
+                    son = cur->fail->son[i];
+                    continue;
+                }
+                son->fail = cur->fail->son[i]; // 计算失配位置
+                // 沿着 last 往上走，可以直接跳到一定是某个 words[k] 的最后一个字母的节点（如果跳到 root 表示没有匹配）
+                son->last = son->fail->len ? son->fail : son->fail->last;
+                q.push(son);
+            }
+        }
+    }
+
+    void query(const string& s) {
+        auto cur = root;
+        for (int i = 0; i < s.size(); i++) {
+            cur = cur->son[s[i] - 'a']; // 如果没有匹配相当于移动到 fail 的 son[target[i-1]-'a']
+            if (cur->len) { // 匹配到了一个尽可能长的 words[k]
+                //f[i] = min(f[i], f[i - cur->len] + cur->cost);
+            }
+            // 还可能匹配其余更短的 words[k]，要在 last 链上找
+            for (auto match = cur->last; match != root; match = match->last) {
+                //f[i] = min(f[i], f[i - match->len] + match->cost);
+            }
+        }
+        //return f[n] == INT_MAX / 2 ? -1 : f[n];
+    }
+};
