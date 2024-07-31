@@ -202,9 +202,9 @@ void single_set(int i, int val, int cl, int cr, int p) {
 	}
 	int m = cl + (cr - cl) / 2;
 	if (i <= m)
-		range_set(i, val, cl, m, p * 2);
+		single_set(i, val, cl, m, p * 2);
 	if (i > m)
-		range_set(i, val, m + 1, cr, p * 2 + 1);
+		single_set(i, val, m + 1, cr, p * 2 + 1);
 	mn[p] = arr[mn[p * 2]] <= arr[mn[p * 2 + 1]] ? mn[p * 2] : mn[p * 2 + 1];
 	mx[p] = arr[mx[p * 2]] >= arr[mx[p * 2 + 1]] ? mx[p * 2] : mx[p * 2 + 1];
 	sum[p] = sum[p * 2] + sum[p * 2 + 1];
