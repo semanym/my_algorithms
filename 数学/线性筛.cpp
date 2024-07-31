@@ -27,8 +27,6 @@ vector<int> pri;
 bool not_prime[N];
 
 void pre(int n) {
-	//可能有题目需要这个 
-	not_prime[1]=true; 
 	for (int i = 2; i <= n; ++i) {
 		if (!not_prime[i]) {
 			pri.push_back(i);

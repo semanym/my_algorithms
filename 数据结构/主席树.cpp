@@ -12,15 +12,15 @@ struct chairTree {
 	//都是只new一次，如果已经设置了maxn的值，在设置一遍要加入delete[] sum......
 	void setMaxn(int _maxn) {
 		maxn = _maxn;
-		sum = new int[(maxn << 5) + 10], rt = new int[maxn + 10],
-		ls = new int[(maxn << 5) + 10], rs = new int[(maxn << 5) + 10],
-		ind = new int[maxn + 10];
+		sum = new int[(maxn << 5) + 10](), rt = new int[maxn + 10](),
+		ls = new int[(maxn << 5) + 10](), rs = new int[(maxn << 5) + 10](),
+		ind = new int[maxn + 10]();
 	}
 
 	chairTree(int _maxn):maxn(_maxn) {
-		sum = new int[(maxn << 5) + 10], rt = new int[maxn + 10],
-		ls = new int[(maxn << 5) + 10], rs = new int[(maxn << 5) + 10],
-		ind = new int[maxn + 10];
+		sum = new int[(maxn << 5) + 10](), rt = new int[maxn + 10](),
+		ls = new int[(maxn << 5) + 10](), rs = new int[(maxn << 5) + 10](),
+		ind = new int[maxn + 10]();
 	}
 
 	int getid(const int &val) {  // 离散化，大于等于

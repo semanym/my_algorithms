@@ -20,7 +20,7 @@ const int N = 200005;
 int n4;
 int n, root=1;
 int arr[N];//下标从1开始
-int lazy[N<<2], mx[N<<2]，mn[N<<2];
+int lazy[N<<2], mx[N<<2],mn[N<<2];
 long long sum[N<<2];
 
 void maintain(int cl, int cr, int p) {

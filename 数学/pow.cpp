@@ -1,8 +1,10 @@
+#include <bits/stdc++.h>
+using namespace std;
 /**
 ¿ìËÙÃÝ 
 */
 
-long long pow(long long x, int n) {
+long long qpow(long long x, int n) {
     long long res = 1;
     for (; n; n /= 2) {
         if (n % 2) {
