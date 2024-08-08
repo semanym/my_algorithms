@@ -1,4 +1,4 @@
-#include<bits/stdc++.h> 
+#include<bits/stdc++.h>
 using namespace std;
 
 const int N = 2e8+5;
@@ -41,18 +41,36 @@ void pre(int n) {
 	}
 }
 
+vector<int> pri;
+bool not_prime[N];
+int fac[N];//每个数的最小质因数，不包括1 
+
+void pre(int n) {
+	for (int i = 2; i <= n; ++i) {
+		if (!not_prime[i]) {
+			pri.push_back(i);
+			fac[i] = i;
+		}
+		for(int j=0; pri[j]<=n/i; ++j) {
+			not_prime[pri[j]*i]=1;
+			fac[pri[j]*i]=pri[j];
+			if(i%pri[j]==0)break;
+		}
+	}
+}
+
 int _sum=0;
-int32_t main(){
+int32_t main() {
 	pre(2e8+2);
-	for(auto a:pri){
-        string temp=to_string(a);
-        string b=temp;
-        reverse(b.begin(),b.end());
-        if(b==temp){
-        	++_sum;
-            cout<<a<<",";
-        }
-    }
-    cout<<"\n"<<_sum;
+	for(auto a:pri) {
+		string temp=to_string(a);
+		string b=temp;
+		reverse(b.begin(),b.end());
+		if(b==temp) {
+			++_sum;
+			cout<<a<<",";
+		}
+	}
+	cout<<"\n"<<_sum;
 	return 0;
 }
