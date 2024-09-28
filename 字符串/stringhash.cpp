@@ -18,6 +18,10 @@ struct HASH {
 
 	bool operator==(const HASH& x) const { return h1 == x.h1 && h2 == x.h2; }
 
+	bool operator<(const HASH& x) const { return h1 < x.h1 || (h1 == x.h1 && h2 < x.h2); }
+
+	bool operator>(const HASH& x) const { return h1 > x.h1 || (h1 == x.h1 && h2 > x.h2); }
+
 	friend std::ostream& operator<<(std::ostream& os, const HASH& hash) {
 		os << "(" << hash.h1 << ", " << hash.h2 << ")";
 		return os;
