@@ -11,6 +11,7 @@ using namespace std;
 using ll = long long;
 using i64 = long long;
 #define all(x) x.begin(), x.end()
+#define rall(x) x.rbegin(), x.rend()
 #define pb push_back
 #define pii pair<int,int>
 #define int long long

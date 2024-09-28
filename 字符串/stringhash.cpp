@@ -1,88 +1,118 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+
 using i64 = long long;
-std::vector<i64>  M = { 1610612741,0,805306457,402653189,201326611,984295877,50331653,1384295981,1011123517 };
-struct stringHash {
-	int n;
-	std::vector<i64> P1, P2, h1, h2;
+std::vector<i64> M = { 1610612741, 0, 805306457, 402653189, 201326611, 100663319, 50331653, 1000000007, 1000000009 };
+
+struct HASH {
+	i64 h1 = 0, h2 = 0;
+
+	HASH operator-(const HASH& x) const { return { h1 - x.h1, h2 - x.h2 }; }
+
+	HASH operator+(const HASH& x) const { return { h1 + x.h1, h2 + x.h2 }; }
+
+	HASH operator+(const std::pair<int, int>& x) const { return { h1 + x.first, h2 + x.second }; }
+
+	HASH operator%(const std::pair<int, int>& x) const { return { h1 % x.first, h2 % x.second }; }
+
+	bool operator==(const HASH& x) const { return h1 == x.h1 && h2 == x.h2; }
+
+	friend std::ostream& operator<<(std::ostream& os, const HASH& hash) {
+		os << "(" << hash.h1 << ", " << hash.h2 << ")";
+		return os;
+	}
+};
+
+template<class T>
+struct Hash {
+	using HASH = int;
+	int n{};
+	std::vector<i64> P1, P2;
+	std::vector<HASH> H;
 	i64 p1 = 131, p2 = 13331;
 
-	stringHash() :n(0) {};
-	stringHash(std::string& s) :n(0) {
-		Init(s);
-	}
+	Hash() {};
+
+	Hash(std::string& s) { Init(s); }
+
+	Hash(std::vector<T>& s) { Init(s); }
+
 	void change() {
 		std::mt19937 rng(std::chrono::system_clock::now().time_since_epoch().count());
-		while (M[1]==0||M[2]==0) shuffle(M.begin(), M.end(), rng);
-		// srand(time(nullptr)); // 用当前时间作为种子
-		// M[0] += rand() % 500;M[1] += rand() % 500;
+		while (M[1] == 0 || M[2] == 0) shuffle(M.begin(), M.end(), rng);
 	}
-	void deal(int st, int len, std::string& s) {
-		P1.resize(len+1);
-		P2.resize(len+1);
-		h1.resize(len+1);
-		h2.resize(len+1);
-		P1[0] = 1; P2[0] = 1;
-		for (int i = st; i<=len; i++) {
-			P1[i] = (P1[i-1]*p1)%M[1];
-			h1[i] = (h1[i-1]*p1+s[i-st])%M[1];
-			P2[i] = (P2[i-1]*p2)%M[2];
-			h2[i] = (h2[i-1]*p2+s[i-st])%M[2];
+
+	void deal(int st, int len, std::vector<T>& s) {
+		P1.resize(len + 1);
+		P2.resize(len + 1);
+		H.resize(len + 1);
+		P1[0] = 1;
+		P2[0] = 1;
+		for (int i = st; i <= len; i++) {
+			P1[i] = (P1[i - 1] * p1) % M[1];
+			P2[i] = (P2[i - 1] * p2) % M[2];
+			H[i].h1 = (H[i - 1].h1 * p1 + s[i - st + 1]) % M[1];
+			H[i].h2 = (H[i - 1].h2 * p2 + s[i - st + 1]) % M[2];
 		}
 	}
+
 	void Init(std::string& s) {
-		if (M[1]==0) change();
-		n = s.size();
+		std::vector<char> str(1, ' ');
+		for (char& c: s)str.push_back(c);
+		Init(str);
+	}
+
+	void Init(std::vector<T>& s) {
+		if (M[1] == 0) change();
+		n = s.size() - 1;
 		deal(1, n, s);
 	}
-	std::pair<i64, i64> get(int l, int r) {//闭区间，从1开始
-		i64 t1 = ((h1[r]-h1[l-1]*P1[r-l+1])%M[1]+M[1])%M[1];
-		i64 t2 = ((h2[r]-h2[l-1]*P2[r-l+1])%M[2]+M[2])%M[2];
-		return { t1,t2 };
+
+	HASH get(int l, int r) {
+		HASH res;
+		res.h1 = ((H[r].h1 - H[l - 1].h1 * P1[r - l + 1]) % M[1] + M[1]) % M[1];
+		res.h2 = ((H[r].h2 - H[l - 1].h2 * P2[r - l + 1]) % M[2] + M[2]) % M[2];
+		return res;
 	}
 
-	std::pair<i64, i64> add(int l1, int r1, int l2, int r2) {//前面的在前面
-		std::pair<i64, i64> it1 = get(l1, r1), it2 = get(l2, r2), it3;
-		it1.first *= P1[r2-l2+1] %= M[1];
-		it1.second *= P2[r2-l2+1] %= M[2];
-		it3.first = (it1.first+it2.first)%M[1];
-		it3.second = (it1.second+it2.second)%M[2];
+	HASH mul(int l1, int r1, int l2, int r2) {
+		HASH it1 = get(l1, r1), it2 = get(l2, r2), it3;
+		it1.h1 *= P1[r2 - l2 + 1] %= M[1];
+		it1.h2 *= P2[r2 - l2 + 1] %= M[2];
+		it3 = (it1 + it2) % getMod();
 		return it3;
 	}
-	std::pair<i64, i64> add(std::pair<i64, i64> l, std::pair<i64, i64> r, i64 len) {//len是后面的长度
-		std::pair<i64, i64> it;
-		l.first *= P1[len] %= M[1];
-		l.second *= P2[len] %= M[2];
-		it.first = (l.first+r.first)%M[1];
-		it.second = (l.second+r.second)%M[2];
-		return it;
-	}
-	void push_back(std::string s) {
-		int tn = (int)s.size();
-		deal(n+1, tn+n, s);
-		n = n+tn;
+
+	HASH mul(HASH l, HASH r, int len) {
+		HASH res;
+		l.h1 *= P1[len] %= M[1];
+		l.h2 *= P2[len] %= M[2];
+		res = (l + r) % getMod();
+		return res;
 	}
 
-	bool equal(std::pair<i64, i64> a, std::pair<i64, i64> b) {
-		return a.first == b.first && a.second == b.second;
-	}
+	void push_back(std::string s) { push_back(std::vector<char>(s.begin(), s.end())); }
+
+	void push_back(std::vector<T> s) { deal(n + 1, s.size() + n, s), n += s.size(); }
+
+	std::pair<i64, i64> getMod() { return std::make_pair(M[1], M[2]); }
 };
 
 int main() {
 	string s = "abcdefg";
-	stringHash sh(s);
-	std::cout<<sh.get(4, 7).first<<" ";//defg
+	Hash<char> sh(s);
+	std::cout<<sh.get(4, 7)<<" ";//defg
 
 	string s2 = "defg";
-	stringHash sh2(s2);
-	cout<<sh2.get(1, 4).first<<"\n";//defg
+	Hash<char> sh2(s2);
+	cout<<sh2.get(1, 4)<<"\n";//defg
 
-	cout<<sh.get(1, 7).first<<" ";//abcdefg
-	cout<<sh.add(sh.get(1, 3), sh2.get(1, 4), 4).first<<" ";//abcdefg
-	cout<<sh.add(1, 3, 4, 7).first<<"\n";//abcdefg
+	cout<<sh.get(1, 7)<<" ";//abcdefg
+	cout<<sh.mul(sh.get(1, 3), sh2.get(1, 4), 4)<<" ";//abcdefg
+	cout<<sh.mul(1, 3, 4, 7)<<"\n";//abcdefg
 
-	cout<<" "<<sh2.equal(sh.get(4, 7), sh2.get(1, 4))<<" ";
+	cout<<" "<<(sh.get(4, 7)==sh2.get(1, 4))<<" ";
 	cout<<(char)97;
 	return 0;
 }

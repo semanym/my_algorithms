@@ -27,39 +27,18 @@ int lengthOfLIS(vector<int> &nums) {
 }
 
 
-/*
-很遗憾我尝试返回最前的一个数组，但是fail了 
-vector<int> lengthOfLIS(vector<int>& nums) {
-	int n = nums.size();
-	if (n == 0) return {0};
-	vector<int> d(n + 1, 0),from(n, -1),index(n + 1);int final = 0;
-	d[0] = 1; d[d[0]] = nums[0];index[1] = 0;index[0] = -1;
-	for (int i = 1; i < n; ++i) {
-		if (nums[i] > d[d[0]]) {//>=
-			d[++d[0]] = nums[i];index[d[0]] = i;final=i;
-			if(from[i] == -1) from[i] = index[d[0]-1];
+int lengthOfLIS(vector<int> &nums) {
+	vector<int> g;
+	for (int x : nums) {
+		auto it = ranges::lower_bound(g, x);
+		if (it == g.end()) {
+			g.push_back(x); // >=x 的 g[j] 不存在
 		} else {
-			int l = 1, r = d[0], pos = 0;
-			while (l <= r) {
-				int mid = (l + r) >> 1;
-				if (d[mid] < nums[i]) {//<=
-					pos = mid;
-					l = mid + 1;
-				} else {
-					r = mid - 1;
-				}
-			}
-			d[pos + 1] = nums[i]; index[pos + 1] = i;
-			if(pos > 0) from[i] = index[pos];
-		} 
+			*it = x;
+		}
 	}
-	d.resize(d[0] + 1);
-	for(int i=d[0];i>=1;--i){
-		d[i]=nums[final];final=from[final];
-	}
-	return d;
+	return g.size();
 }
-*/
 
 int main() {
 	int n;
